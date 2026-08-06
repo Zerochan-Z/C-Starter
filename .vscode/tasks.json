@@ -1,0 +1,27 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build QuantLab",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-Wall", "-Wextra", "-g3",
+                "main.c",
+                "indicator.c",
+                "portfolio.c",
+                "utils.c",
+                "-o",
+                "output/main.exe"
+            ],
+            "options": {
+                "cwd": "D:/Users/Zac Tee/Documents/GitHub/C-Starter/Projects in C/QuantLab-C/Refactor Multi files"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}
