@@ -28,7 +28,7 @@ int main() {
     // stocks = pointer to array of stocks starts as empty
     int count = 0;
 
-    char *path = "D:/Users/Zac Tee/Documents/GitHub/C-Starter/Projects in C/QuantLab-C/Refactor Multi Files/data.csv";
+    char *path = "D:/Users/Zac Tee/Documents/GitHub/C-Starter/Projects in C/QuantLab-C/5. Stop-Loss/data.csv";
     FILE *file = fopen(path, "r");
 
     if (file == NULL) {
@@ -76,6 +76,7 @@ int main() {
     float holdings = 0.0;
     float totalWealth = 0.0;
     float startingCash = 10000.00;
+    float buy_price = 0.0;
 
     for (int i = 0; i < count; i++) {
         if (i < 20) {
@@ -88,9 +89,10 @@ int main() {
             signal = HOLD;
         }
 
+        reduce_lost(&signal, &buy_price, stocks[i].close, 0.10, &cash, &holdings);
         const char *sig = signal_name(signal);
 
-        execute_trade(signal, stocks[i].close, &cash, &holdings);
+        execute_trade(&signal, stocks[i].close, &cash, &holdings, &buy_price);
         totalWealth = calculate_wealth(cash, holdings, stocks[i].close);
 
         printf("%d. %s | C: %.2f | SMA5: %.2f | SMA20: %.2f | Return: %.2f%% |\nSignal: %s | Total Wealth: %.2f\n",

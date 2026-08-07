@@ -15,7 +15,7 @@
                 "output/main.exe"
             ],
             "options": {
-                "cwd": "D:/Users/Zac Tee/Documents/GitHub/C-Starter/Projects in C/QuantLab-C/Refactor Multi files"
+                "cwd": "D:/Users/Zac Tee/Documents/GitHub/C-Starter/Projects in C/QuantLab-C/5. Stop-Loss"
             },
             "group": {
                 "kind": "build",
