@@ -21,6 +21,22 @@ typedef struct {
     Priority priority;
 } Task;
 
+const char* priority_str(Priority p) {
+    switch (p) {
+        case LOW: return "LOW";
+        case MEDIUM: return "MEDIUM"; 
+        case HIGH: return "HIGH"; 
+        default: return "ERROR"; 
+    }
+}
+
+const char* status_str(Status s) {
+    switch (s) {
+        case PENDING: return "PENDING"; 
+        case COMPLETED: return "COMPLETED";
+        default: return "ERROR";
+    }
+}
 
 int count = 0;
 int capacity = 10;
@@ -70,14 +86,65 @@ void add_task() {
     
     list[count] = t;
     count++;
+
 }
 
 void view_tasks() {
+    if (count == 0) {
+        printf("No task to view.\n");
+        return;
+    }
+    
+    for (int i = 0; i < count; i++) {
+        printf("ID: %d\n", i + 1);
+        printf("Task title: %s\n", list[i].title);
+        printf("Task description: %s\n", list[i].description);
+        printf("Due date: %s\n", list[i].due_date);
+        printf("Priority: %s\n", priority_str(list[i].priority));
+        printf("Status: %s\n\n", status_str(list[i].status));
+    }
+}
 
+void mark_completed() {
+    if (count == 0) {
+        printf("No task to mark.\n");
+        return;
+    }
+
+    int ID;
+    printf("Enter the task ID you want to mark as completed.\n");
+    printf("ID: ");
+    scanf("%d", &ID);
+    getchar();
+    int index = ID - 1;
+
+    if (index < 0 || index >= count) {
+        printf("Invalid ID input.\n");
+    } else if (list[index].status == COMPLETED) {
+        printf("%d ID is already completed.\n", ID);
+    } else {
+        list[index].status = COMPLETED;
+        printf("%d ID is marked as completed successfully.\n", ID);
+    }
 }
 
 int main() {
     list = malloc(capacity * sizeof(Task));
-    
+    int choice;
+
+    do {
+        printf("\n1. Add task.\n");
+        printf("2. View tasks.\n");
+        printf("3. Mark as completed.\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+            case 1: add_task; break;
+            case 2: 
+        }
+    } while (choice != 4);
     return 0;
 }
