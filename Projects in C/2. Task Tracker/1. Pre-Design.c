@@ -42,15 +42,66 @@ int count = 0;
 int capacity = 10;
 Task *list;
 
+void save_tasks() {
+    FILE *path;
+
+    path = fopen("tasks.txt", "w");
+    if (path == NULL) {
+        printf("No task file saved.\n");
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        fprintf(path, "%s|%s|%s|%d|%d\n", 
+                list[i].title, list[i].description,
+                list[i].due_date, list[i].status, list[i].priority);
+    }
+    fclose(path);
+}
+
+void load_tasks() {
+    FILE *path;
+    path = fopen("tasks.txt", "r");
+    if (path == NULL) {
+        printf("No task file loaded.\n");
+        return;
+    }
+    
+    char line[350];
+    while(fgets(line, sizeof(line), path) != NULL) {
+        if (count == capacity) {
+            Task *temp = realloc(list, (capacity + 10) * sizeof(Task));
+            if (temp == NULL) {
+                printf("Array size renew failed.\n");
+                return;
+            }
+            capacity += 10;
+            list = temp;
+        }
+
+        char *token = strtok(line, "|");
+        strcpy(list[count].title, token);
+        token = strtok(NULL, "|");
+        strcpy(list[count].description, token);
+        token = strtok(NULL, "|");
+        strcpy(list[count].due_date, token);
+        token = strtok(NULL, "|");
+        list[count].status = (Status)atoi(token);
+        token = strtok(NULL, "|");
+        list[count].priority = (Priority)atoi(token);
+
+        count++;
+    }
+}
+
 void add_task() {
     if (count == capacity) {
         Task *temp = realloc(list, (capacity + 10) * sizeof(Task));
         if (temp == NULL) {
-            printf("Array size added failed.\n");
+            printf("Array size renew failed.\n");
             return;
         }
         capacity += 10;
-
         list = temp;
     }
     
@@ -77,13 +128,14 @@ void add_task() {
         t.due_date[len - 1] = '\0';
     }
     
-    printf("Enter priority (2 = HIGH, 1 = MEDIUM, 0 = LOW): ");
+    printf("Enter priority (0 = LOW, 1 = MEDIUM, 2 = HIGH): ");
     int p;
     scanf("%d", &p);
     getchar();
     t.priority = (Priority)p; // Cast the int to enum type
     t.status = PENDING;
     
+    printf("{%s} task saved.\n", t.title);
     list[count] = t;
     count++;
 
@@ -130,6 +182,7 @@ void mark_completed() {
 
 int main() {
     list = malloc(capacity * sizeof(Task));
+    load_tasks();
     int choice;
 
     do {
@@ -139,12 +192,25 @@ int main() {
         printf("4. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
+        printf("\n");
         getchar();
 
         switch (choice) {
-            case 1: add_task; break;
-            case 2: 
+            case 1: add_task(); break;
+            case 2: view_tasks(); break;
+            case 3: mark_completed(); break;
+            case 4: {
+                printf("Thanks for using this system!!!.\n");
+                save_tasks(); 
+                break;   
+            }
+            default: {
+                printf("Enter choice 1-4.\n");
+                continue;
+            }
         }
     } while (choice != 4);
+
+    free(list);
     return 0;
 }
