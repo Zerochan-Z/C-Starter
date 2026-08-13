@@ -14,6 +14,7 @@ typedef enum {
 } Priority;
 
 typedef struct {
+    int ID;
     char due_date[11];
     char title[100];
     char description[200];
@@ -38,6 +39,15 @@ const char* status_str(Status s) {
     }
 }
 
+void pad_date(char *date) { 
+    // ensure the month, day and year is 2-2-4 digit
+    // while sorting, it's a must to set these conditions
+    // or else 08 is earlier than 8 although they're the same
+    int year, month, day;
+    sscanf(date, "%d-%d-%d", &year, &month, &day);
+    sprintf(date, "%04d-%02d-%02d", year, month, day);
+}
+
 int count = 0;
 int capacity = 10;
 Task *list;
@@ -52,8 +62,8 @@ void save_tasks() {
     }
 
     for (int i = 0; i < count; i++) {
-        fprintf(path, "%s|%s|%s|%d|%d\n", 
-                list[i].title, list[i].description,
+        fprintf(path, "%d|%s|%s|%s|%d|%d\n", 
+                list[i].ID, list[i].title, list[i].description,
                 list[i].due_date, list[i].status, list[i].priority);
     }
     fclose(path);
@@ -80,6 +90,8 @@ void load_tasks() {
         }
 
         char *token = strtok(line, "|");
+        list[count].ID = atoi(token);
+        token = strtok(NULL, "|");
         strcpy(list[count].title, token);
         token = strtok(NULL, "|");
         strcpy(list[count].description, token);
@@ -107,6 +119,7 @@ void add_task() {
     
     Task t;
 
+    t.ID = count + 1;
     printf("Enter task's title: ");
     fgets(t.title, sizeof(t.title), stdin);
     int len = strlen(t.title);
@@ -121,12 +134,13 @@ void add_task() {
         t.description[len - 1] = '\0';
     }
 
-    printf("Enter task's due date: ");
+    printf("Enter task's due date (Y-M-D): ");
     fgets(t.due_date, sizeof(t.due_date), stdin);
     len = strlen(t.due_date);
     if (len > 0 && t.due_date[len - 1] == '\n') {
         t.due_date[len - 1] = '\0';
     }
+    pad_date(t.due_date);
     
     printf("Enter priority (0 = LOW, 1 = MEDIUM, 2 = HIGH): ");
     int p;
@@ -138,7 +152,6 @@ void add_task() {
     printf("{%s} task saved.\n", t.title);
     list[count] = t;
     count++;
-
 }
 
 void view_tasks() {
@@ -147,14 +160,44 @@ void view_tasks() {
         return;
     }
     
+    Task **temp = malloc(count * sizeof(Task*)); 
+    // temp is array of pointers (Task *)
+    //not array of struct (Task)
+    // it should be size of pointers not struct
+    
     for (int i = 0; i < count; i++) {
-        printf("ID: %d\n", i + 1);
-        printf("Task title: %s\n", list[i].title);
-        printf("Task description: %s\n", list[i].description);
-        printf("Due date: %s\n", list[i].due_date);
-        printf("Priority: %s\n", priority_str(list[i].priority));
-        printf("Status: %s\n\n", status_str(list[i].status));
+        temp[i] = &list[i];
+        // temp[i] is one pointer (Task*)
     }
+    
+    for (int i = 0; i < count - 1; i++) {
+        for (int k = 0; k < count - 1 - i; k++) {
+            // temp[k]->due_date is dereference the pointer
+            // to get the struct then access to title
+            if (strcmp(temp[k]->due_date, temp[k + 1]->due_date) > 0) {
+                // if [k]->due_date is bigger than [k+1]->due_date
+                // swap so earlier date comes first                 Task *swap = temp[k];
+                temp[k] = temp[k + 1];
+                temp[k + 1] = swap;
+            } else if (strcmp(temp[k]->due_date, temp[k + 1]->due_date) == 0 && temp[k]->priority < temp[k + 1]->priority) {
+                // if temp[k]->due_date and temp[k + 1]->due_date is the same
+                // AND [k] priority is lower than [k+1], swap for descending priority                
+                Task *swap = temp[k];
+                temp[k] = temp[k + 1];
+                temp[k + 1] = swap;
+            } 
+        }
+    }
+
+    for (int i = 0; i < count; i++) {
+        printf("ID: %d\n", temp[i]->ID);
+        printf("Task title: %s\n", temp[i]->title); // same as (*(temp + i)) -> title
+        printf("Task description: %s\n", temp[i]->description);
+        printf("Due date: %s\n", temp[i]->due_date);
+        printf("Priority: %s\n", priority_str(temp[i]->priority));
+        printf("Status: %s\n\n", status_str(temp[i]->status));
+    }
+    free(temp);
 }
 
 void mark_completed() {
@@ -163,20 +206,27 @@ void mark_completed() {
         return;
     }
 
-    int ID;
+    int target_id;
     printf("Enter the task ID you want to mark as completed.\n");
     printf("ID: ");
-    scanf("%d", &ID);
+    scanf("%d", &target_id);
     getchar();
-    int index = ID - 1;
 
-    if (index < 0 || index >= count) {
-        printf("Invalid ID input.\n");
-    } else if (list[index].status == COMPLETED) {
-        printf("%d ID is already completed.\n", ID);
+    int found = -1;
+    for (int i = 0; i < count; i++) {
+        if (list[i].ID == target_id) {
+            found = i;
+            break;
+        } 
+    }
+
+    if (found == -1) {
+        printf("Target ID %d not found.\n", target_id);
+    } else if (list[found].status == COMPLETED) {
+        printf("Already completed.\n");
     } else {
-        list[index].status = COMPLETED;
-        printf("%d ID is marked as completed successfully.\n", ID);
+        list[found].status = COMPLETED;
+        printf("%s marked complete.\n", list[found].title);
     }
 }
 
@@ -200,7 +250,7 @@ int main() {
             case 2: view_tasks(); break;
             case 3: mark_completed(); break;
             case 4: {
-                printf("Thanks for using this system!!!.\n");
+                printf("Thanks for using this system !\n");
                 save_tasks(); 
                 break;   
             }
