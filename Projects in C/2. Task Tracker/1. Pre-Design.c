@@ -176,7 +176,8 @@ void view_tasks() {
             // to get the struct then access to title
             if (strcmp(temp[k]->due_date, temp[k + 1]->due_date) > 0) {
                 // if [k]->due_date is bigger than [k+1]->due_date
-                // swap so earlier date comes first                 Task *swap = temp[k];
+                // swap so earlier date comes first                 
+                Task *swap = temp[k];
                 temp[k] = temp[k + 1];
                 temp[k + 1] = swap;
             } else if (strcmp(temp[k]->due_date, temp[k + 1]->due_date) == 0 && temp[k]->priority < temp[k + 1]->priority) {
