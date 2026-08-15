@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <ctype.h>
 
 typedef enum {
     PENDING,
@@ -357,6 +358,58 @@ void editTask() {
     } while (choice != 5);
 }
 
+void deleteTask() {
+    if (count == 0) {
+        printf("No task to delete.\n");
+        return;
+    }
+
+    int found = -1;
+    int target_id;
+    printf("Enter the ID you wanna delete: ");
+    scanf("%d", &target_id);
+    getchar();
+    
+    for (int i = 0; i < count; i++) {
+        if (target_id == list[i].ID) {
+            found = i;
+            break;
+        }
+    }
+
+    if (found == -1) {
+        printf("Target ID %d not found.\n", target_id);
+        return;
+    } else {
+        printf("Current: %s | %s | %s | %s | %s\n", 
+                list[found].title, list[found].description, 
+                list[found].due_date, status_str(list[found].status),
+                priority_str(list[found].priority));
+    }
+
+    char choice;
+    while (1) {
+        printf("Confirm to delete this task? (Y/N): ");
+        scanf("%c", &choice);
+        getchar();
+
+        if (toupper(choice) == 'Y') {
+            for (int i = found; i < count - 1; i++) {
+                list[i] = list[i + 1];
+            }
+            count--;
+            save_tasks();
+            printf("Task deleted.\n");
+            break;
+        } else if (toupper(choice) == 'N') {
+            printf("Task deletion cancelled.\n");
+            break;
+        } else {
+            printf("Please enter (Y/N).\n");
+        }
+    }
+}
+
 int main() {
     list = malloc(capacity * sizeof(Task));
     load_tasks();
@@ -368,7 +421,8 @@ int main() {
         printf("3. Mark as completed.\n");
         printf("4. Check alerts.\n");
         printf("5. Edit task.\n");
-        printf("6. Exit\n");
+        printf("6. Delete task.\n");
+        printf("7. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
         printf("\n");
@@ -380,17 +434,18 @@ int main() {
             case 3: mark_completed(); break;
             case 4: check_alerts(); break;
             case 5: editTask(); break;
-            case 6: {
+            case 6: deleteTask(); break;
+            case 7: {
                 printf("Thanks for using this system !\n");
                 save_tasks(); 
                 break;   
             }
             default: {
-                printf("Enter choice 1-6.\n");
+                printf("Enter choice 1-7.\n");
                 continue;
             }
         }
-    } while (choice != 6);
+    } while (choice != 7);
 
     free(list);
     return 0;
