@@ -19,6 +19,26 @@ Node *create_node(int data) {
     return new_node;
 }
 
+void insert_head(List *list, int data) {
+    Node *new_node = create_node(data);
+
+    if (list->head == NULL) {
+        list->head = new_node;
+        list->tail = new_node;
+    } else {
+        // My old thought: 
+        // list->head->next = new_node
+        // OldHead->next = NewNode (Wrong)
+        // OLD ->next ADDRESS is NULL
+        // new data >> we fill in the new address into ->next
+        new_node->next = list->head;
+        // New node's next points to the old head,
+        // connecting it to the rest of the list
+        list->head = new_node;
+        // then ->head = the actual new node
+    }
+}
+
 void insert_tail(List *list, int data) {
     Node *new_node = create_node(data);
     // address of node
@@ -94,11 +114,16 @@ void free_list(List *list) {
 int main() {
     List list = {NULL, NULL};
 
-    insert_tail(&list, 10);
-    insert_tail(&list, 20);
+    insert_head(&list, 30);
+    insert_head(&list, 20);
+    insert_head(&list, 10);
+
     insert_tail(&list, 30);
+    insert_tail(&list, 40);
+    insert_tail(&list, 50);
 
     print_list(&list);
     free_list(&list);
+
     return 0;
 }
