@@ -39,6 +39,35 @@ void insert_head(List *list, int data) {
     }
 }
 
+/*
+Virtual graph: 
+First line:
+list->head  --------------------+
+                                 |
+                                 v
+                         +---------+    +---------+
+                         | Node A  |    | Node B  |
+                         | next ---+--->| next ---+---> NULL
+                         +---------+    +---------+
+                                ^
+                                |
+new_node ----------------> +---------+
+                           | Node C  |
+                           | next ---+ (points to Node A!)
+                           +---------+
+
+Second line: 
+
+list->head  ---------------+
+                            |
+                            v
+                         +---------+    +---------+    +---------+
+                         | Node C  |    | Node A  |    | Node B  |
+                         | next ---+--->| next ---+--->| next ---+---> NULL
+                         +---------+    +---------+    +---------+
+                      
+*/
+
 void insert_tail(List *list, int data) {
     Node *new_node = create_node(data);
     // address of node

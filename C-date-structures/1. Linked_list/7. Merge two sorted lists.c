@@ -75,8 +75,8 @@ Node *merge_sorted_lists(Node *head1, Node *head2) {
             tail = tail->next;
             head1 = head1->next;
         } else {
-            tail->next = create_node(head2->data);
-            tail = tail->next;
+            tail->next = create_node(head2->data); // next is new data
+            tail = tail->next; // set new tail as the (next) tail
             head2 = head2->next;
         }
     }

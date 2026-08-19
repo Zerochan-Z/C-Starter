@@ -106,7 +106,10 @@ int main() {
     print_list(&list);
 
     find_cycle(&list);
-    list.tail->next = list.head;
+    list.tail->next = list.head; // Runs from last to front
+    // slow will meet fast since slow is slower 1 address ran by fast
+    // Cycle detected if we put these codes
+    // Must happen all the time except the list is empty
     find_cycle(&list);
 
     free_list(&list);
